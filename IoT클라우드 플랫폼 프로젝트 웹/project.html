@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>박현철과 이주혁의 프로젝트</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />	
+	</head>
+	
+		<!-- JQuery 라이브러리 설정 -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+        <!-- 현재 시간 기온 조회-->
+        <script src="update_device.js"></script>
+        <!-- 기온 기록 조회-->
+        <script src="state_log.js"></script>
+    
+	<style>
+		table, th, td{
+			border: 1px solid #bcbcbc
+		}
+		
+		table{
+
+			width: 1000px;
+			height: 100px;
+		}
+	</style>
+	
+	<body>
+			<section id="banner">
+				<h2><strong>오늘의 날씨</strong></h2>
+				<p>실시간 온도를 지금 확인하세요</p>
+				<ul class="actions">
+					<input type="button" value="조회 시작" onclick="On();" /></li><br><br><br>
+					<center><div id="result"></table></center>
+				</ul>			
+			</section>
+					<h2><center>기온 기록 조회</center></h2>				
+					<center>
+						<input type="button" value="조회 시작" onclick="Start();" />
+						<input type="button" value="조회 중지" onclick="Stop();" />
+					</center>
+        			<center><table id="result2"></table></center>
+	</body>
+
+</html>
