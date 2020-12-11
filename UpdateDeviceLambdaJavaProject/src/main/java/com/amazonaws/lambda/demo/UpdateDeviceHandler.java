@@ -29,8 +29,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 // 현재 시각의 날씨 데이터를 API로 받아와서 디바이스 섀도우에 전송하는 함수
 public class UpdateDeviceHandler implements RequestHandler<Event, String> {
     API api = new API();
-    String nowDate = LocalDateTime.now().plusHours(8L).format(DateTimeFormatter.ofPattern("yyyyMMddHH")); //현재시간 -1임 왜냐하면 현재시각으로 하면 API 날씨값이 아직 없기때문에 1시간 전 날씨 봐야함
-    String nowDate2 = LocalDateTime.now().minusHours(14L).format(DateTimeFormatter.ofPattern("yyyyMMddHH")); //현재시간 기준 22시간 전 기온
+    String nowDate = LocalDateTime.now().plusHours(8L).format(DateTimeFormatter.ofPattern("yyyyMMddHH")); //날씨api로부터 얻을 수 있는 온도는 1시간 전 기준이 가장 최신 정보이기 때문에 현재시간 -1시간의 시간 데이터를 불러온다.
+    String nowDate2 = LocalDateTime.now().minusHours(14L).format(DateTimeFormatter.ofPattern("yyyyMMddHH")); //날씨api에서 24시간 전의 온도데이터까지만 제공을 하기 때문에 에러율을 줄이기 위해 22시간 전의 시간 데이터를 불러올 수 밖에 없었다.
           
     @Override
     public String handleRequest(Event event, Context context) {
@@ -50,12 +50,12 @@ public class UpdateDeviceHandler implements RequestHandler<Event, String> {
         return resultString;
     }
 
-    private String getPayload(ArrayList<Tag> tags) {
+    private String getPayload(ArrayList<Tag> tags) { 
         String tagstr = "";
         String time, date, datetime, date2, time2;
         for (int i=0; i < tags.size(); i++) {
             if (i !=  0) tagstr += ", ";
-            if(tags.get(i).tagName.equals("timeWT")) {
+            if(tags.get(i).tagName.equals("timeWT")) { // timeWT라는 태그네임을 입력받았을 때에만 날씨api를 호출하여 문자열에 추가한다.
             	try {
             		date = nowDate.substring(0,8);
             		time = nowDate.substring(8,10);
@@ -107,7 +107,7 @@ class Tag {
         tagValue = v;
     }
 }
-class API{
+class API{ // 날씨API를 요청하는 함수
 	String b;
     
     public String get(String strUrl) throws IOException, ParseException, org.json.simple.parser.ParseException {
