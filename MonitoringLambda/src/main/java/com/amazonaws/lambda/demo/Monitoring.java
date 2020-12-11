@@ -36,7 +36,8 @@ public class Monitoring implements RequestHandler<Object, String> {
 	                .withRegion(Regions.AP_NORTHEAST_2)
 	                .withCredentials( new AWSStaticCredentialsProvider(awsCreds) )
 	                .build();
-
+		// 기존에 실습에서 배운 온도가 특정값 이상일 때 이메일이 전송되는 것과 달리, 날씨 정보를 받아올 때마다 이메일을 전송한다.
+		// 단, 현재의 날씨와 어제의 날씨를 비교하여 전송하는 문자열을 달리하고, 현재 날씨의 온도에 따라서 문자열을 달리하여 추가한다.
 	    String msg = "오늘의 기온은 " + WT + "C 입니다.\n";
 	    final String subject = "오늘의 날씨";
 	    
