@@ -1,6 +1,6 @@
 // 중지를 위해 ID 보관
 var intervalId = null;
-function getToday(){
+function getToday(){ //로그 기록을 조회할 때 현재 시간을 기준으로 API를 요청하여 모든 기간의 기록을 불러온다. 
     var date = new Date();
     var year = date.getFullYear();
     var month = ("0" + (1 + date.getMonth())).slice(-2);
@@ -32,8 +32,8 @@ var invokeAPI2 = function() {
         method: 'GET',
         contentType: "application/json",
         success: function (result) {
-            Data = JSON.parse(result);
-            printData(Data.data);    
+            Data = JSON.parse(result); //API로부터 받아온 문자열을 JSON형태로 바꿔준다.
+            printData(Data.data); //JSON 데이터에서 data라는 항목을 추출하여 함수에 넣어준다.
         },
         error: function(xhr,status,e){
                 alert("error");
@@ -56,7 +56,7 @@ var printData = function (result) {
         var th4 = document.createElement("th");
         var td1 = document.createElement("td");
         $("#result2").append(tr);
-        if (result.length > 0) {
+        if (result.length > 0) { //api의 data항목의 길이가 0보다 클 때 다음 명령어를 실행한다.
 
             var tr = document.createElement("tr");
             tr.setAttribute("style","background-color:#01DFD7");
@@ -75,7 +75,7 @@ var printData = function (result) {
             tr.append(th4);
             result = result.reverse();
             $("#result2").append(tr);
-            result.forEach(function(v){
+            result.forEach(function(v){ //data 내에서 각 항목당 추가적으로 칸을 생성하고, COLOR, WT, YesterDay, timestamp 값을 추출하여 입력한다.
                 var tr = document.createElement("tr");
                 var td1 = document.createElement("td");
                 var td2 = document.createElement("td");
