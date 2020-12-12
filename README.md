@@ -354,7 +354,7 @@ public class Monitoring implements RequestHandler<Object, String> {
 ## 시연 모습
 <img src="https://user-images.githubusercontent.com/71054445/101980110-6d3ec500-3ca6-11eb-954d-7936b01c11a9.png" width="50%">
 
-> 위에 조회 시작 버튼을 누르면 UpdateDeviceHandler 함수에 "TimeWT"라는 태그네임의 문자열이 전송된다.
+> 위에 조회 시작 버튼을 누르면 Rest API의 PUT 메소드가 실행되어 UpdateDeviceHandler 함수에 "TimeWT"라는 태그네임의 문자열이 전송된다.
 >> ( UpdateDeviceHandler 함수는 "TimeWT"라는 태그네임을 입력받으면 날씨 API를 요청한다. )
 <img src="https://user-images.githubusercontent.com/71054445/101980523-5a79bf80-3ca9-11eb-86dc-c6f22c939137.png" width="50%">
 
@@ -365,7 +365,7 @@ public class Monitoring implements RequestHandler<Object, String> {
 >> ( "TimeWT"라는 태그네임을 전송하도록 코드를 작성해두었다. "TimeWT"의 태그네임을 입력받으면 값에 상관없이 날씨 API가 호출된다. )
 <img src="https://user-images.githubusercontent.com/71054445/101980795-5a7abf00-3cab-11eb-890e-b24dc07f0f5c.png" width="80%">
 
-> 아래의 기록 조회 시작 버튼을 클릭 시 LED 상태와 날씨정보에 대한 기록이 출력된다. LED의 상태가 LED였다가 날씨 값을 받고 BLUE로 변경되었다.
+> 아래의 기록 조회 시작 버튼을 클릭 시 Rest API Log의 GET 메소드가 출력되어 LED 상태와 날씨정보에 대한 기록이 출력된다. LED의 상태가 LED였다가 날씨 값을 받고 BLUE로 변경되었다.
 >> ( 단, LED 상태는 아두이노가 연결되어있을 때에만 갱신된다. )
 <img src="https://user-images.githubusercontent.com/71054445/101980884-07553c00-3cac-11eb-9e81-99af57c7d2e4.jpg" width="50%">
 
