@@ -8,7 +8,7 @@
  * 날씨 정보에 따라 이메일의 내용을 달리하여 전송한다.
  * 날씨 정보와 LED의 컬러를 Dynamo DB에 기록한다.
 ## 서비스 구조
-![구조](https://user-images.githubusercontent.com/71054445/101979693-847bb380-3ca2-11eb-8ff5-f955f937765b.png)
+![구조2](https://user-images.githubusercontent.com/71054445/102005808-311b6b00-3d5f-11eb-866f-c7596c88ac68.png)
 ## Java AWS Lambda 코드 설명
 #### UpdateDeviceLambdaProject
 ###### 웹에서 버튼 클릭 시 날씨 API를 요청하여 디바이스 섀도우에 전송하는 함수
