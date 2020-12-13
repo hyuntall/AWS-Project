@@ -278,6 +278,32 @@ class Event {
     }
 ```
 디바이스 섀도우에서 데이터를 받아와 현재 기온과 어제의 기온값을 실수 형태로 파싱하여 비교한 후, 조건에 따라서 LED를 점등하고 LED의 상태를 디바이스 섀도우에 전송한다.
+## 자바스크립트 코드 부분 설명
+#### update_device.js
+```javascript
+var invokeAPI = function() { //다음 API 주소에 payload를 전송한다.
+    // 디바이스 조회 URI
+    var API_URI = 'https://q1gtpjku33.execute-api.ap-northeast-2.amazonaws.com/prod/devices/MyMKRWiFi1010';
+    
+      
+    $.ajax(API_URI, {
+        method: 'PUT',
+        contentType: "application/json",
+        data: JSON.stringify(payload), // payload를 전송하기 전에 문자열로 바꿔준다.
+
+        success: function (data, status, xhr) { // API에 payload 전송에 성공했을 때, 호출된 람다함수에서 얻은 현재 날씨 정보를 웹 화면에 출력한다.
+                var result = JSON.parse(data);
+                document.getElementById("result").innerText = "현재 기온: "+ result.state.desired.WT+"ºC";
+               
+                console.log("data="+data);
+        },
+        error: function(xhr,status,e){
+                alert("error");
+        }
+    });
+};
+```
+변수 payload 안에 "TimeWT"를 태그네임으로 가진 JSON문자열을 저장해두었기 때문에 API_URI와 연결된 람다함수는 날씨API를 요청하고, 그 응답 데이터를 html에 출력한다.
 ## 시연 모습
 <img src="https://user-images.githubusercontent.com/71054445/101980110-6d3ec500-3ca6-11eb-954d-7936b01c11a9.png" width="50%">
 
