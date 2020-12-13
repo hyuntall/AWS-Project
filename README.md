@@ -244,6 +244,40 @@ class Event {
 	}
 ```
 처음에 초기화한 문자열에서 if문의 조건에 따라 각각의 다른 내용의 문자열을 추가하여 이메일로 전송한다.
+## 아두이노 코드 부분 설명
+```javascript
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, buffer);
+  JsonObject root = doc.as<JsonObject>();
+  int timestamp = root["timestamp"];
+  JsonObject state = root["state"];
+  float WT = atof(state["WT"]); //shadow/delta에서 현재 온도 WT를 실수값으로 받아와서 저장한다.
+  float YesterDay = atof(state["YesterDay"]); //어제의 온도 YesterDay를 실수값으로 받아와서 저장한다.
+    Serial.println(WT);
+    Serial.println(getTime());
+    if(YesterDay>WT){ // 현재 온도가 어제의 온도보다 낮으면 payload에 문자열 BLUE를 저장하고 파란색 LED를 점등한다.
+      Serial.println("BLUE");
+      sprintf(payload,"{\"state\":{\"desired\":{\"COLOR\":\"%s\"}}}","BLUE");
+      digitalWrite(red, LOW);
+      digitalWrite(green, LOW);
+      digitalWrite(blue, HIGH);
+    }
+    else if(YesterDay<WT){ // 현재 온도가 어제의 온도보다 높으면 payload에 문자열 RED를 저장하고 빨간색 LED를 점등한다.
+      Serial.println("RED");
+      sprintf(payload,"{\"state\":{\"desired\":{\"COLOR\":\"%s\"}}}","RED");
+      digitalWrite(blue, LOW);
+      digitalWrite(green, LOW);
+      digitalWrite(red, HIGH);
+    }
+    else{ // 현재 온도가 어제의 온도와 같으면 payload에 문자열 GREEN를 저장하고 초록색 LED를 점등한다.
+      Serial.println("GREEN");
+      sprintf(payload,"{\"state\":{\"desired\":{\"COLOR\":\"%s\"}}}","GREEN");
+      digitalWrite(red, LOW);
+      digitalWrite(blue, LOW);
+      digitalWrite(green, HIGH);
+    }
+```
+디바이스 섀도우에서 데이터를 받아와 현재 기온과 어제의 기온값을 실수 형태로 파싱하여 비교한 후, 조건에 따라서 LED를 점등하고 LED의 상태를 디바이스 섀도우에 전송한다.
 ## 시연 모습
 <img src="https://user-images.githubusercontent.com/71054445/101980110-6d3ec500-3ca6-11eb-954d-7936b01c11a9.png" width="50%">
 
