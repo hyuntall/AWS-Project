@@ -9,7 +9,7 @@
  * 날씨 정보와 LED의 컬러를 Dynamo DB에 기록한다.
 ## 서비스 구조
 ![구조2](https://user-images.githubusercontent.com/71054445/102005808-311b6b00-3d5f-11eb-866f-c7596c88ac68.png)
-## Java AWS Lambda 코드 설명
+## Java AWS Lambda 코드  설명
 #### UpdateDeviceLambdaProject
 ###### 웹에서 버튼 클릭 시 날씨 API를 요청하여 디바이스 섀도우에 전송하는 함수
 >> 
@@ -22,25 +22,9 @@ public class UpdateDeviceHandler implements RequestHandler<Event, String> {
 //날씨api로부터 얻을 수 있는 온도는 1시간 전 기준이 가장 최신 정보이기 때문에 현재시간 -1시간의 시간 데이터를 불러온다.
     String nowDate2 = LocalDateTime.now().minusHours(14L).format(DateTimeFormatter.ofPattern("yyyyMMddHH"));
 //날씨api에서 24시간 전의 온도데이터까지만 제공을 하기 때문에 에러율을 줄이기 위해 22시간 전의 시간 데이터를 불러올 수 밖에 없었다.
-          
-    @Override
-    public String handleRequest(Event event, Context context) {
-        context.getLogger().log("Input: " + event);
-        AWSIotData iotData = AWSIotDataClientBuilder.standard().build();
-        String payload = getPayload(event.tags);
-
-        UpdateThingShadowRequest updateThingShadowRequest  = 
-                new UpdateThingShadowRequest()
-                    .withThingName(event.device)
-                    .withPayload(ByteBuffer.wrap(payload.getBytes()));
-
-        UpdateThingShadowResult result = iotData.updateThingShadow(updateThingShadowRequest);
-        byte[] bytes = new byte[result.getPayload().remaining()];
-        result.getPayload().get(bytes);
-        String resultString = new String(bytes);
-        return resultString;
-    }
-
+```
+실시간으로 시간 정보를 받아오기 위해 LocalDateTime을 사용하였다.
+```javascript
     private String getPayload(ArrayList<Tag> tags) { 
         String tagstr = "";
         String time, date, datetime, date2, time2;
@@ -76,29 +60,9 @@ public class UpdateDeviceHandler implements RequestHandler<Event, String> {
     }
     
 }
-
-class Event {
-    public String device;
-    public ArrayList<Tag> tags;
-
-    public Event() {
-         tags = new ArrayList<Tag>();
-    }
-}
-
-class Tag {
-    public String tagName;
-    public String tagValue;
-
-    @JsonCreator 
-    public Tag() {
-    }
-
-    public Tag(String n, String v) {
-        tagName = n;
-        tagValue = v;
-    }
-}
+```
+특정 태그네임을 받으면 호출한 두개의 시간의 날짜, 시간 분 단위만 추출하여 날씨api를 호출하기 위한 두개의 url 주소에 각각 넣어주었다.
+```javascript
 class API{ // 날씨API를 요청하는 함수
 	String b;
     
@@ -141,25 +105,12 @@ class API{ // 날씨API를 요청하는 함수
     	}
 }
 ```
+날씨API를 호출하기 위한 함수로, 날씨 정보에서 기온을 나타내는 부분만을 파싱하여 문자열로 리턴하였다.
 #### RecodingDeviceDataJavaProject2
 ###### 디바이스 섀도우의 데이터를 DynamoDB에 전송하는 함수
 >> 
 ```javascript
 // 디바이스 섀도우의 데이터를 DynamoDB에 저장하는 함수
-public class RecordingDeviceInfoHandler2 implements RequestHandler<Document, String>  {
-	static String buffer;
-    private DynamoDB dynamoDb;
-    private String DYNAMODB_TABLE_NAME = "Logging";
-
-    @Override
-    public String handleRequest(Document input, Context context) {
-        this.initDynamoDbClient();
-        context.getLogger().log("Input: " + input);
-
-        //return null;
-        return persistData(input);
-    }
-
     private String persistData(Document document) throws ConditionalCheckFailedException {
 
         // Epoch Conversion Code: https://www.epochconverter.com/
@@ -182,41 +133,8 @@ public class RecordingDeviceInfoHandler2 implements RequestHandler<Document, Str
                         .withString("timestamp",timeString)))
                 .toString();
     }
-
-    private void initDynamoDbClient() {
-        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion("ap-northeast-2").build();
-
-        this.dynamoDb = new DynamoDB(client);
-    }
-}
-
-class Document {
-    public Thing previous;       
-    public Thing current;
-    public long timestamp;
-    public String device;       // AWS IoT에 등록된 사물 이름 
-}
-
-class Thing {
-    public State state = new State();
-    public long timestamp;
-    public String clientToken;
-
-    public class State {
-        public Tag reported = new Tag();
-        public Tag desired = new Tag();
-
-        public class Tag {
-            public String temperature;
-            public String LED;
-            public String COLOR;
-            public String WT;
-            public String timeWT;
-            public String YesterDay;
-        }
-    }
-}
 ```
+아두이노에서 지속적으로 LED 상태를 보내서 같은 내용의 데이터가 중첩되는것을 방지하기 위해 LED상태, 현재 온도, 어제의 온도가 이전 데이터와 같으면 DynamoDB에 저장하지 않는다.
 #### LogDeviceLambdaJavaProject
 ###### DynamoDB에 기록된 LED의 상태와 날씨 정보의 기록을 조회하는 함수
 >>
@@ -287,35 +205,12 @@ class Event {
     public String to;
 }
 ```
+기존의 실습자료의 코드와 일치하게 사용하였다.
 #### MonitoringLambda
 ###### 날씨 요청 시 현재 날씨와 어제의 날씨를 비교하고, 날씨에 따른 추천 옷차림을 메일로 전송하는 함수
 >>
 ```javascript
 // 날씨 데이터를 요청받으면 현재의 날씨와 추천하는 옷 스타일을 이메일로 전송하는 함수
-public class Monitoring implements RequestHandler<Object, String> {
-
-	@Override
-	public String handleRequest(Object input, Context context) {
-	    context.getLogger().log("Input: " + input);
-	    String json = ""+input;
-	    JsonParser parser = new JsonParser();
-	    JsonElement element = parser.parse(json);
-	    JsonElement state = element.getAsJsonObject().get("state");
-	    JsonElement desired = state.getAsJsonObject().get("desired");
-	    String WT = desired.getAsJsonObject().get("WT").getAsString();
-	    String YesDay = desired.getAsJsonObject().get("YesterDay").getAsString();
-	    double today = Double.valueOf(WT);
-	    double yesterday = Double.valueOf(YesDay);
-	    
-	    final String AccessKey="AKIARRXCMQZVBQPRH3JF";
-        final String SecretKey="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";
-	    final String topicArn="arn:aws:sns:ap-northeast-2:106775217770:temerature_warning_topic";
-
-	    BasicAWSCredentials awsCreds = new BasicAWSCredentials(AccessKey, SecretKey);  
-	    AmazonSNS sns = AmazonSNSClientBuilder.standard()
-	                .withRegion(Regions.AP_NORTHEAST_2)
-	                .withCredentials( new AWSStaticCredentialsProvider(awsCreds) )
-	                .build();
 		// 기존에 실습에서 배운 온도가 특정값 이상일 때 이메일이 전송되는 것과 달리, 날씨 정보를 받아올 때마다 이메일을 전송한다.
 		// 단, 현재의 날씨와 어제의 날씨를 비교하여 전송하는 문자열을 달리하고, 현재 날씨의 온도에 따라서 문자열을 달리하여 추가한다.
 	    String msg = "오늘의 기온은 " + WT + "C 입니다.\n";
@@ -347,10 +242,8 @@ public class Monitoring implements RequestHandler<Object, String> {
 
 	    return subject+ "temperature = " + WT + "!";
 	}
-
-
-}
 ```
+처음에 초기화한 문자열에서 if문의 조건에 따라 각각의 다른 내용의 문자열을 추가하여 이메일로 전송한다.
 ## 시연 모습
 <img src="https://user-images.githubusercontent.com/71054445/101980110-6d3ec500-3ca6-11eb-954d-7936b01c11a9.png" width="50%">
 
